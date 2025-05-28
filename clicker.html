@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ХЕВИ КЛИКЕР</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #18181b url('image.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        #counter {
+            font-size: 3.2em;
+            margin-bottom: 16px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 8px #000, 0 0 8px #0008;
+        }
+        #title {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #22d3ee;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 6px #000, 0 0 6px #0008;
+        }
+        #click-button {
+            padding: 22px 0;
+            width: 90vw;
+            max-width: 420px;
+            font-size: 1.5em;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #0ea5e9 60%, #22d3ee 100%);
+            color: #fff;
+            user-select: none;
+            margin: 18px 0 28px 0;
+            font-weight: bold;
+            box-shadow: 0 4px 24px #0008;
+            transition: background 0.2s, transform 0.1s;
+            text-transform: uppercase;
+        }
+        #click-button:active {
+            background: linear-gradient(90deg, #0369a1 60%, #0891b2 100%);
+            transform: scale(0.97);
+        }
+        #progress-container {
+            width: 92vw;
+            max-width: 440px;
+            margin: 10px auto 22px auto;
+            height: 18px;
+            background: #23232bcc;
+            border-radius: 9px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px #0004;
+        }
+        #progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #22d3ee 60%, #0ea5e9 100%);
+            transition: width 0.3s;
+        }
+        #upgrades-container {
+            width: 100vw;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 0 2vw;
+        }
+        .upgrade-card {
+            background: #23232bfa;
+            border-radius: 14px;
+            box-shadow: 0 2px 16px #0008;
+            margin: 12px 0;
+            padding: 18px 18px 18px 22px;
+            max-width: 99vw;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            opacity: 1;
+            border: 2px solid #222;
+            transition: border 0.2s, opacity 0.2s, box-shadow 0.2s;
+        }
+        .upgrade-card.available {
+            border: 2.5px solid #22d3ee;
+            box-shadow: 0 0 16px #22d3ee60;
+        }
+        .upgrade-card.bought {
+            opacity: 0.5;
+        }
+        .upgrade-title {
+            font-weight: bold;
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .upgrade-desc {
+            font-size: 1.05em;
+            margin-bottom: 12px;
+            color: #a3e2f7;
+        }
+        .upgrade-cost {
+            font-size: 1em;
+            margin-bottom: 14px;
+            color: #38bdf8;
+        }
+        .upgrade-btn {
+            padding: 10px 28px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            border: none;
+            background: #18181b;
+            color: #fff;
+            font-weight: bold;
+            transition: background 0.2s, transform 0.1s;
+            cursor: not-allowed;
+            text-transform: uppercase;
+        }
+        .upgrade-btn.available {
+            background: linear-gradient(90deg, #0ea5e9 60%, #22d3ee 100%);
+            cursor: pointer;
+        }
+        .upgrade-btn:active.available {
+            background: #0369a1;
+            transform: scale(0.97);
+        }
+        @media (max-width: 600px) {
+            #counter { font-size: 2.1em; }
+            #title { font-size: 1em; }
+            #click-button { font-size: 1.1em; padding: 16px 0; }
+            #progress-container { height: 12px; }
+            .upgrade-card { padding: 12px 8px 12px 10px; }
+            .upgrade-title { font-size: 1em; }
+            .upgrade-desc { font-size: 0.95em; }
+            .upgrade-cost { font-size: 0.9em; }
+            .upgrade-btn { font-size: 0.95em; padding: 8px 10px; }
+        }
+        .tab-btn {
+            flex: 1 1 0;
+            padding: 12px 0;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px 10px 0 0;
+            background: #23232b;
+            color: #a3e2f7;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            text-transform: uppercase;
+            outline: none;
+        }
+        .tab-btn.active {
+            background: linear-gradient(90deg, #0ea5e9 60%, #22d3ee 100%);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div id="tabs" style="display: flex; justify-content: center; align-items: center; width: 100vw; max-width: 480px; margin: 0 auto 18px auto; gap: 8px;">
+        <button id="tab-click" class="tab-btn active">КЛИКЕР</button>
+        <button id="tab-upgrades" class="tab-btn">УЛУЧШЕНИЯ</button>
+    </div>
+    <div id="main-content">
+        <div id="counter">0</div>
+        <div id="title">МАЛЕНЬКИЙ ХЭВИ</div>
+        <div id="progress-container"><div id="progress-bar"></div></div>
+        <button id="click-button">КЛИКНИ МЕНЯ</button>
+    </div>
+    <div id="upgrades-content" style="display:none;">
+        <div id="upgrades-container"></div>
+    </div>
+
+    <script>
+        let count = 0;
+        const counterElement = document.getElementById('counter');
+        const clickButton = document.getElementById('click-button');
+        const titleElement = document.getElementById('title');
+        const progressBar = document.getElementById('progress-bar');
+
+        const levels = [
+            { min: 0, max: 49, title: 'МАЛЕНЬКИЙ ХЭВИ', emoji: '🥄', next: 50 },
+            { min: 50, max: 199, title: 'КЛИКЭР ХЭВИ', emoji: '🖱️', next: 200 },
+            { min: 200, max: 499, title: 'ХЭВЭ ЛЮБИМКА', emoji: '💖', next: 500 },
+            { min: 500, max: 999, title: 'НАСТОЯЩИЙ ХЭВИ', emoji: '🦾', next: 1000 },
+            { min: 1000, max: Infinity, title: 'ГИГА-ХЭВЭ', emoji: '👑', next: null }
+        ];
+
+        let currentLevel = 0;
+        let perClick = 1;
+
+        const upgrades = [
+            { id: 1, name: 'БОЛЬШОЙ ПАЛЕЦ ХЭВЭ', desc: 'ТЕПЕРЬ ТЫ ЖМЁШЬ СИЛЬНЕЕ! +2 ЗА КЛИК', cost: 50, bonus: 2, bought: false },
+            { id: 2, name: 'ДВОЙНОЙ ХЕВЯК', desc: 'ДВА ХЭВИ — ДВА КУЛАКА! +5 ЗА КЛИК', cost: 200, bonus: 5, bought: false },
+            { id: 3, name: 'АРМИЯ ДЕМОНОВ ХЭВЭ', desc: 'ДЕМОНЫ ПОМОГАЮТ КЛИКАТЬ! +10 ЗА КЛИК', cost: 500, bonus: 10, bought: false },
+            { id: 4, name: 'ХЭВИ С БУТЕРБРОДОМ', desc: 'СЭНДВИЧ ДАЁТ СИЛУ! +25 ЗА КЛИК', cost: 1200, bonus: 25, bought: false },
+            { id: 5, name: 'ГИГА-ХЭВИ С ПИВОМ', desc: 'ПИВО ПРИДАЁТ МОЩИ! +50 ЗА КЛИК', cost: 3000, bonus: 50, bought: false }
+        ];
+
+        function getLevel(count) {
+            for (let i = levels.length - 1; i >= 0; i--) {
+                if (count >= levels[i].min) return i;
+            }
+            return 0;
+        }
+
+        function updateUI() {
+            counterElement.textContent = count;
+            const levelIdx = getLevel(count);
+            const level = levels[levelIdx];
+            titleElement.textContent = level.title.toUpperCase() + ' ' + level.emoji;
+            // Прогресс-бар
+            if (level.next) {
+                const progress = (count - level.min) / (level.next - level.min);
+                progressBar.style.width = (progress * 100) + '%';
+            } else {
+                progressBar.style.width = '100%';
+            }
+            // Апгрейды
+            renderUpgrades();
+        }
+
+        function renderUpgrades() {
+            const container = document.getElementById('upgrades-container');
+            container.innerHTML = '';
+            upgrades.forEach(upg => {
+                const canBuy = !upg.bought && count >= upg.cost;
+                const bought = upg.bought;
+                const card = document.createElement('div');
+                card.className = 'upgrade-card' + (canBuy ? ' available' : '') + (bought ? ' bought' : '');
+                const title = document.createElement('div');
+                title.className = 'upgrade-title';
+                title.textContent = upg.name.toUpperCase();
+                const desc = document.createElement('div');
+                desc.className = 'upgrade-desc';
+                desc.textContent = upg.desc.toUpperCase();
+                const cost = document.createElement('div');
+                cost.className = 'upgrade-cost';
+                cost.textContent = `ЦЕНА: ${upg.cost} КЛИКОВ`;
+                const btn = document.createElement('button');
+                btn.className = 'upgrade-btn' + (canBuy && !bought ? ' available' : '');
+                btn.textContent = bought ? 'КУПЛЕНО' : (canBuy ? 'КУПИТЬ' : 'НЕДОСТАТОЧНО КЛИКОВ');
+                btn.disabled = bought || !canBuy;
+                btn.onclick = () => {
+                    if (!bought && canBuy) {
+                        upg.bought = true;
+                        perClick += upg.bonus;
+                        updateUI();
+                    }
+                };
+                card.appendChild(title);
+                card.appendChild(desc);
+                card.appendChild(cost);
+                card.appendChild(btn);
+                container.appendChild(card);
+            });
+        }
+
+        updateUI();
+
+        clickButton.addEventListener('click', () => {
+            count += perClick;
+            updateUI();
+        });
+
+        const tabClick = document.getElementById('tab-click');
+        const tabUpgrades = document.getElementById('tab-upgrades');
+        const mainContent = document.getElementById('main-content');
+        const upgradesContent = document.getElementById('upgrades-content');
+
+        tabClick.addEventListener('click', () => {
+            tabClick.classList.add('active');
+            tabUpgrades.classList.remove('active');
+            mainContent.style.display = '';
+            upgradesContent.style.display = 'none';
+        });
+
+        tabUpgrades.addEventListener('click', () => {
+            tabUpgrades.classList.add('active');
+            tabClick.classList.remove('active');
+            mainContent.style.display = 'none';
+            upgradesContent.style.display = '';
+        });
+    </script>
+</body>
+</html>
