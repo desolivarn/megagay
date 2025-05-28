@@ -49,11 +49,16 @@ html, body {
 #screamer {
     display: none;
     position: fixed;
+    top: 0; left: 0;
     width: 100%;
     height: 100%;
-    background: url('screamer.jpg') no-repeat center center;
-    background-size: cover;
     z-index: 999;
+    background: black;
+}
+#screamer video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 </style>
 </head>
@@ -62,21 +67,44 @@ html, body {
 <div id="fake-screen">
     <h2>Cookies и сторонний контент</h2>
     <p>Этот сайт использует cookies что-бы собирать информацию об ошибках чтобы улучшить сайт и исправить ошибки. Примите cookies для хорошей оптимальной производительности.</p>
-    <button>Принять</button>
-    <button>Отклонить</button>
+    <button id="accept-btn">Принять</button>
+    <button id="decline-btn">Отклонить</button>
     <a href="#">Пользовательское соглашение</a>
 </div>
 
-<div id="screamer"></div>
-<audio id="scream-sound" src="screamer.mp3"></audio>
+<div id="screamer">
+    <video id="screamer-video" src="video.mp4" muted></video>
+</div>
 
 <script>
-document.body.addEventListener('click', () => {
-    document.getElementById('fake-screen').style.display = 'none';
-    document.getElementById('screamer').style.display = 'block';
-    const audio = document.getElementById('scream-sound');
-    audio.play();
-    document.documentElement.requestFullscreen();
+const acceptBtn = document.getElementById('accept-btn');
+const declineBtn = document.getElementById('decline-btn');
+const fakeScreen = document.getElementById('fake-screen');
+const screamer = document.getElementById('screamer');
+const screamerVideo = document.getElementById('screamer-video');
+
+function showScreamer() {
+    fakeScreen.style.display = 'none';
+    screamer.style.display = 'block';
+    
+    // Запросить полноэкранный режим
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+    }
+    
+    screamerVideo.play();
+}
+
+// Обработчики на обе кнопки
+acceptBtn.addEventListener('click', showScreamer);
+declineBtn.addEventListener('click', showScreamer);
+
+// По окончании видео можно выйти из полноэкранного и спрятать скример (опционально)
+screamerVideo.addEventListener('ended', () => {
+    screamer.style.display = 'none';
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    }
 });
 </script>
 
