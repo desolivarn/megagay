@@ -1,80 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Immersive Experience</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            height: 100vh;
-            background-color: #000;
-            cursor: none;
-        }
-
-        #fullscreen-img {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: 1;
-        }
-
-        #start-btn {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 15px 30px;
-            font-size: 18px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: 2px solid white;
-            border-radius: 5px;
-            z-index: 2;
-            cursor: pointer;
-        }
-
-            #start-btn:hover {
-                background: rgba(255,255,255,0.2);
-            }
-    </style>
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #e5e5e9;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#fake-screen {
+    text-align: center;
+    max-width: 400px;
+}
+#fake-screen h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+#fake-screen p {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+#fake-screen button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    background: #9f7aea;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+#fake-screen button:nth-child(2) {
+    background: transparent;
+    color: #9f7aea;
+    border: 1px solid #9f7aea;
+}
+#fake-screen a {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #9f7aea;
+    text-decoration: underline;
+}
+#screamer {
+    display: none;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: url('screamer.jpg') no-repeat center center;
+    background-size: cover;
+    z-index: 999;
+}
+</style>
 </head>
 <body>
-    <img id="fullscreen-img" src="image.jpg" alt="Fullscreen Background">
-    <audio id="bg-audio" loop>
-        <source src="sound.mp3" type="audio/mpeg">
-    </audio>
 
-    <button id="start-btn">НАЖМИ НА ДАУНА</button>
+<div id="fake-screen">
+    <h2>Cookies и сторонний контент</h2>
+    <p>Этот сайт использует cookies что-бы собирать информацию об ошибках чтобы улучшить сайт и исправить ошибки. Примите cookies для хорошей оптимальной производительности.</p>
+    <button>Принять</button>
+    <button>Отклонить</button>
+    <a href="#">Пользовательское соглашение</a>
+</div>
 
-    <script>
-        document.getElementById('start-btn').addEventListener('click', function () {
-            // Запуск музыки
-            const audio = document.getElementById('bg-audio');
-            audio.play().catch(e => console.error("Audio error:", e));
+<div id="screamer"></div>
+<audio id="scream-sound" src="screamer.mp3"></audio>
 
-            // Полноэкранный режим
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            }
+<script>
+document.body.addEventListener('click', () => {
+    document.getElementById('fake-screen').style.display = 'none';
+    document.getElementById('screamer').style.display = 'block';
+    const audio = document.getElementById('scream-sound');
+    audio.play();
+    document.documentElement.requestFullscreen();
+});
+</script>
 
-            // Скрываем кнопку после запуска
-            this.style.display = 'none';
-            document.body.style.cursor = 'none';
-        });
-
-        // Автозапуск при любом взаимодействии с документом
-        document.addEventListener('click', function firstInteraction() {
-            document.getElementById('start-btn').click();
-            document.removeEventListener('click', firstInteraction);
-        });
-    </script>
 </body>
 </html>
