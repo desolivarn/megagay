@@ -13,6 +13,7 @@
             background: #18181b url('image.jpg') no-repeat center center fixed;
             background-size: cover;
             font-family: 'Segoe UI', Arial, sans-serif;
+            overflow-x: hidden;
         }
         #counter {
             font-size: 3.2em;
@@ -20,6 +21,7 @@
             font-weight: bold;
             color: #fff;
             text-shadow: 2px 2px 8px #000, 0 0 8px #0008;
+            will-change: transform;
         }
         #title {
             font-size: 1.3em;
@@ -46,6 +48,7 @@
             box-shadow: 0 4px 24px #0008;
             transition: background 0.2s, transform 0.1s;
             text-transform: uppercase;
+            will-change: transform;
         }
         #click-button:active {
             background: linear-gradient(90deg, #0369a1 60%, #0891b2 100%);
@@ -65,7 +68,8 @@
             height: 100%;
             width: 0;
             background: linear-gradient(90deg, #22d3ee 60%, #0ea5e9 100%);
-            transition: width 0.3s;
+            transition: width 0.3s ease-out;
+            will-change: width;
         }
         #upgrades-container {
             width: 100vw;
@@ -90,6 +94,8 @@
             opacity: 1;
             border: 2px solid #222;
             transition: border 0.2s, opacity 0.2s, box-shadow 0.2s;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
         }
         .upgrade-card.available {
             border: 2.5px solid #22d3ee;
@@ -183,12 +189,22 @@
     </div>
 
     <script>
+        // Оптимизация: константы и переменные
+        const CLICK_DELAY = 50; // 50ms между кликами (20 FPS)
+        let lastClickTime = 0;
+        let isTabActive = true;
+        
+        // Инициализация состояния
         let count = 0;
+        let currentLevel = 0;
+        let perClick = 1;
         const counterElement = document.getElementById('counter');
         const clickButton = document.getElementById('click-button');
         const titleElement = document.getElementById('title');
         const progressBar = document.getElementById('progress-bar');
+        const upgradeElements = [];
 
+        // Данные уровней и апгрейдов
         const levels = [
             { min: 0, max: 49, title: 'МАЛЕНЬКИЙ ХЭВИ', emoji: '🥄', next: 50 },
             { min: 50, max: 199, title: 'КЛИКЭР ХЭВИ', emoji: '🖱️', next: 200 },
@@ -196,9 +212,6 @@
             { min: 500, max: 999, title: 'НАСТОЯЩИЙ ХЭВИ', emoji: '🦾', next: 1000 },
             { min: 1000, max: Infinity, title: 'ГИГА-ХЭВЭ', emoji: '👑', next: null }
         ];
-
-        let currentLevel = 0;
-        let perClick = 1;
 
         const upgrades = [
             { id: 1, name: 'БОЛЬШОЙ ПАЛЕЦ ХЭВЭ', desc: 'ТЕПЕРЬ ТЫ ЖМЁШЬ СИЛЬНЕЕ! +2 ЗА КЛИК', cost: 50, bonus: 2, bought: false },
@@ -208,6 +221,7 @@
             { id: 5, name: 'ГИГА-ХЭВИ С ПИВОМ', desc: 'ПИВО ПРИДАЁТ МОЩИ! +50 ЗА КЛИК', cost: 3000, bonus: 50, bought: false }
         ];
 
+        // Функции
         function getLevel(count) {
             for (let i = levels.length - 1; i >= 0; i--) {
                 if (count >= levels[i].min) return i;
@@ -215,83 +229,129 @@
             return 0;
         }
 
-        function updateUI() {
+        function updateCounter() {
             counterElement.textContent = count;
-            const levelIdx = getLevel(count);
-            const level = levels[levelIdx];
-            titleElement.textContent = level.title.toUpperCase() + ' ' + level.emoji;
-            // Прогресс-бар
+        }
+
+        function updateProgressBar() {
+            const level = levels[currentLevel];
             if (level.next) {
                 const progress = (count - level.min) / (level.next - level.min);
-                progressBar.style.width = (progress * 100) + '%';
+                progressBar.style.width = `${progress * 100}%`;
             } else {
                 progressBar.style.width = '100%';
             }
-            // Апгрейды
-            renderUpgrades();
         }
 
-        function renderUpgrades() {
+        function updateTitle() {
+            const level = levels[currentLevel];
+            titleElement.textContent = level.title.toUpperCase() + ' ' + level.emoji;
+        }
+
+        function checkLevelUp() {
+            const newLevel = getLevel(count);
+            if (newLevel !== currentLevel) {
+                currentLevel = newLevel;
+                updateTitle();
+            }
+        }
+
+        function initUpgrades() {
             const container = document.getElementById('upgrades-container');
-            container.innerHTML = '';
-            upgrades.forEach(upg => {
-                const canBuy = !upg.bought && count >= upg.cost;
-                const bought = upg.bought;
+            upgrades.forEach((upg, i) => {
                 const card = document.createElement('div');
-                card.className = 'upgrade-card' + (canBuy ? ' available' : '') + (bought ? ' bought' : '');
+                card.className = 'upgrade-card';
+                
                 const title = document.createElement('div');
                 title.className = 'upgrade-title';
                 title.textContent = upg.name.toUpperCase();
+                
                 const desc = document.createElement('div');
                 desc.className = 'upgrade-desc';
                 desc.textContent = upg.desc.toUpperCase();
+                
                 const cost = document.createElement('div');
                 cost.className = 'upgrade-cost';
                 cost.textContent = `ЦЕНА: ${upg.cost} КЛИКОВ`;
+                
                 const btn = document.createElement('button');
-                btn.className = 'upgrade-btn' + (canBuy && !bought ? ' available' : '');
-                btn.textContent = bought ? 'КУПЛЕНО' : (canBuy ? 'КУПИТЬ' : 'НЕДОСТАТОЧНО КЛИКОВ');
-                btn.disabled = bought || !canBuy;
-                btn.onclick = () => {
-                    if (!bought && canBuy) {
-                        upg.bought = true;
-                        perClick += upg.bonus;
-                        updateUI();
-                    }
-                };
+                btn.className = 'upgrade-btn';
+                btn.textContent = 'НЕДОСТАТОЧНО КЛИКОВ';
+                btn.onclick = () => buyUpgrade(i);
+                
                 card.appendChild(title);
                 card.appendChild(desc);
                 card.appendChild(cost);
                 card.appendChild(btn);
                 container.appendChild(card);
+                
+                upgradeElements.push({ card, btn });
             });
         }
 
-        updateUI();
+        function updateUpgrades() {
+            if (!isTabActive) return;
+            
+            upgrades.forEach((upg, i) => {
+                const { card, btn } = upgradeElements[i];
+                const canBuy = !upg.bought && count >= upg.cost;
+                
+                card.className = `upgrade-card${canBuy ? ' available' : ''}${upg.bought ? ' bought' : ''}`;
+                btn.className = `upgrade-btn${canBuy ? ' available' : ''}`;
+                btn.disabled = upg.bought || !canBuy;
+                btn.textContent = upg.bought ? 'КУПЛЕНО' : (canBuy ? 'КУПИТЬ' : 'НЕДОСТАТОЧНО КЛИКОВ');
+            });
+        }
 
+        function buyUpgrade(index) {
+            const upg = upgrades[index];
+            if (!upg.bought && count >= upg.cost) {
+                upg.bought = true;
+                perClick += upg.bonus;
+                updateUpgrades();
+            }
+        }
+
+        function updateUI() {
+            updateCounter();
+            updateProgressBar();
+            checkLevelUp();
+            updateUpgrades();
+        }
+
+        // Обработчики событий
         clickButton.addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastClickTime < CLICK_DELAY) return;
+            lastClickTime = now;
+            
             count += perClick;
             updateUI();
         });
 
-        const tabClick = document.getElementById('tab-click');
-        const tabUpgrades = document.getElementById('tab-upgrades');
-        const mainContent = document.getElementById('main-content');
-        const upgradesContent = document.getElementById('upgrades-content');
-
-        tabClick.addEventListener('click', () => {
-            tabClick.classList.add('active');
-            tabUpgrades.classList.remove('active');
-            mainContent.style.display = '';
-            upgradesContent.style.display = 'none';
+        document.addEventListener('visibilitychange', () => {
+            isTabActive = !document.hidden;
+            if (isTabActive) updateUI();
         });
 
-        tabUpgrades.addEventListener('click', () => {
-            tabUpgrades.classList.add('active');
-            tabClick.classList.remove('active');
-            mainContent.style.display = 'none';
-            upgradesContent.style.display = '';
+        // Инициализация вкладок
+        document.getElementById('tab-click').addEventListener('click', () => {
+            document.getElementById('tab-click').classList.add('active');
+            document.getElementById('tab-upgrades').classList.remove('active');
+            document.getElementById('main-content').style.display = '';
+            document.getElementById('upgrades-content').style.display = 'none';
         });
+
+        document.getElementById('tab-upgrades').addEventListener('click', () => {
+            document.getElementById('tab-upgrades').classList.add('active');
+            document.getElementById('tab-click').classList.remove('active');
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('upgrades-content').style.display = '';
+        });
+
+        // Запуск
+        initUpgrades();
+        updateUI();
     </script>
 </body>
 </html>
