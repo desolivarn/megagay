@@ -73,7 +73,7 @@ html, body {
 </div>
 
 <div id="screamer">
-    <video id="screamer-video" src="video.mp4" muted></video>
+    <video id="screamer-video" src="your-video.mp4" autoplay></video>
 </div>
 
 <script>
@@ -86,8 +86,7 @@ const screamerVideo = document.getElementById('screamer-video');
 function showScreamer() {
     fakeScreen.style.display = 'none';
     screamer.style.display = 'block';
-    
-    // Запросить полноэкранный режим
+
     if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen();
     }
@@ -95,11 +94,9 @@ function showScreamer() {
     screamerVideo.play();
 }
 
-// Обработчики на обе кнопки
 acceptBtn.addEventListener('click', showScreamer);
 declineBtn.addEventListener('click', showScreamer);
 
-// По окончании видео можно выйти из полноэкранного и спрятать скример (опционально)
 screamerVideo.addEventListener('ended', () => {
     screamer.style.display = 'none';
     if (document.exitFullscreen) {
