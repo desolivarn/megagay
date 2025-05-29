@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Обитель ХЭВИ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            flex-direction: column;
+        }
+        .heavy-god-container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .heavy-god-container h1 {
+            color: black;
+            margin-bottom: 20px;
+            font-size: 2em;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+        .heavy-god-container img {
+            max-width: 90vw;
+            max-height: 80vh;
+            height: auto;
+            display: block;
+        }
+        @media (max-width: 600px) {
+             .heavy-god-container h1 {
+                font-size: 1.5em;
+             }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        #timer-text {
+            color: black;
+            font-size: 1.2em;
+            margin-top: 10px;
+            font-weight: bold;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        #background-audio {
+            display: none;
+        }
+
+        #click-to-play {
+            color: black;
+            font-size: 2em;
+            cursor: pointer;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+            z-index: 20;
+        }
+
+        #volume-control {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+        }
+
+        #volume-control p {
+            color: black;
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 2em;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        #volume-control input[type="range"] {
+            width: 150px;
+        }
+
+        @media (max-width: 600px) {
+             .heavy-god-container h1 {
+                font-size: 1.5em;
+             }
+             #click-to-play {
+                 font-size: 1.5em;
+                 bottom: 50px;
+             }
+             #volume-control {
+                right: 10px;
+             }
+             #volume-control p {
+                font-size: 1.5em;
+             }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="heavy-god-container">
+        <h1>ПОКЛОНЕНИЕ ВЕЛИКОМУ БОГУ ХЕВИ</h1>
+        <div id="timer-text" style="display:none;">ОЖИДАЙТЕ! ТАЙМЕР: 60</div>
+        <img src="Фото/ВЕЛИКИЙ БОГ ХЕВИ.png" alt="ВЕЛИКИЙ БОГ ХЕВИ">
+    </div>
+
+    <div id="click-to-play">НАЖМИ СЮДА! И ПОКЛОНЕНИЕ НАЧНЕТСЯ В ТУ ЖЕ СЕКУНДУ</div>
+
+    <div id="volume-control">
+        <p>ПРЕДОХРАНЕНИЕ ОТ ИСКАЖЕНИЙ</p>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+    </div>
+
+    <audio id="background-audio">
+        <source src="Звуки/ПОКЛОНЕНИЕ.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+
+    <script>
+        const timerTextElement = document.getElementById('timer-text');
+        let timeLeft = 60;
+        const TIMER_KEY = 'heavy_god_timer_end';
+        const TIMER_DURATION = 60;
+        function getTimerEnd() {
+            let end = localStorage.getItem(TIMER_KEY);
+            if (!end) {
+                end = Date.now() + TIMER_DURATION * 1000;
+                localStorage.setItem(TIMER_KEY, end);
+            }
+            return parseInt(end, 10);
+        }
+        function updateTimer() {
+            const end = getTimerEnd();
+            const now = Date.now();
+            timeLeft = Math.max(0, Math.ceil((end - now) / 1000));
+            timerTextElement.textContent = `ОЖИДАЙТЕ! ТАЙМЕР: ${timeLeft}`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerTextElement.textContent = 'ОЖИДАЙТЕ! ТАЙМЕР: 0';
+                localStorage.setItem('stage_heavy_god_passed', '1');
+                localStorage.removeItem(TIMER_KEY);
+                setTimeout(() => {
+                    window.location.href = 'WHAT%20THIS%20IS.html';
+                }, 1000);
+            }
+        }
+        let timerInterval;
+        const audioElement = document.getElementById('background-audio');
+        const clickToPlayElement = document.getElementById('click-to-play');
+        const volumeControlElement = document.getElementById('volume-control');
+        const volumeSlider = document.getElementById('volume-slider');
+        audioElement.removeAttribute('autoplay');
+        localStorage.removeItem(TIMER_KEY);
+        clickToPlayElement.addEventListener('click', function playAudioOnce() {
+            const end = Date.now() + TIMER_DURATION * 1000;
+            localStorage.setItem(TIMER_KEY, end);
+            audioElement.play().then(() => {
+                clickToPlayElement.style.display = 'none';
+                volumeControlElement.style.display = 'flex';
+                timerTextElement.style.display = 'block';
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+            }).catch(error => {
+            });
+            clickToPlayElement.removeEventListener('click', playAudioOnce);
+        });
+        volumeSlider.addEventListener('input', () => {
+            audioElement.volume = volumeSlider.value;
+        });
+        audioElement.addEventListener('ended', () => {
+        });
+    </script>
+</body>
+</html>

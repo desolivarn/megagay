@@ -120,6 +120,7 @@ function showScreamer() {
     }
     
     screamerVideo.play();
+    localStorage.setItem('stage_clicker_allowed', '1');
 }
 
 acceptBtn.addEventListener('click', showScreamer);

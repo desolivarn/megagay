@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WHAT THIS IS</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: black;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .main-text {
+            font-size: 2em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #big-timer {
+            font-size: 2.5em;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        @media (max-width: 600px) {
+            .main-text { font-size: 1.2em; }
+            #big-timer { font-size: 1.3em; }
+        }
+    </style>
+    <script>
+        if (!localStorage.getItem('stage_heavy_god_passed')) {
+            window.location.href = 'heavy_god.html';
+        }
+    </script>
+</head>
+<body>
+    <div class="main-text">ЧТО ТО СКОРО ГРЕДЕТ К НАМ...</div>
+    <div id="big-timer">35:00:00</div>
+    <script>
+        const TIMER_KEY = 'what_this_is_timer_end';
+        const TIMER_DURATION = 35 * 60 * 60;
+        function getTimerEnd() {
+            let end = localStorage.getItem(TIMER_KEY);
+            if (!end) {
+                end = Date.now() + TIMER_DURATION * 1000;
+                localStorage.setItem(TIMER_KEY, end);
+            }
+            return parseInt(end, 10);
+        }
+        function formatTime(sec) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+        function updateTimer() {
+            const end = getTimerEnd();
+            const now = Date.now();
+            let left = Math.max(0, Math.ceil((end - now) / 1000));
+            document.getElementById('big-timer').textContent = formatTime(left);
+        }
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    </script>
+</body>
+</html>
